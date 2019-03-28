@@ -57,7 +57,7 @@ number {digit}+
 "," 	{ printf("%s \t COMMA\n", yytext); }
 
 "\"" 	{ printf("%s \t QUOTA\n", yytext); }
-"\n" 	{ ; }
+[\n] 	{;}
 
 {id}	{ printf("%s \t ID\n", yytext); }
 
