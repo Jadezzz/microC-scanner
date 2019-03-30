@@ -2,6 +2,11 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
+	#include <stdbool.h>
+
+	bool isString = false;
+	unsigned int lineNo = 0;
+	unsigned int commentNo = 0;
 %}
 
 /* Define regular expression label */
@@ -51,16 +56,37 @@ number {digit}+
 "}" 	{ printf("%s \t RCB\n", yytext); }
 "[" 	{ printf("%s \t LSB\n", yytext); }
 "]" 	{ printf("%s \t RSB\n", yytext); }
-
 ";" 	{ printf("%s \t SEMICOLON\n", yytext); }
-
 "," 	{ printf("%s \t COMMA\n", yytext); }
+"\"" 	{ 
+			isString = !isString;
+			printf("%s \t QUOTA\n", yytext); 
+		}
 
-"\"" 	{ printf("%s \t QUOTA\n", yytext); }
-[\n] 	{;}
+ /* Keywords */
+"int"	{ printf("%s \t INT\n", yytext); }
+"float"	{ printf("%s \t FLOAT\n", yytext); }
+"bool"	{ printf("%s \t BOOL\n", yytext); }
+"void"	{ printf("%s \t VOID\n", yytext); }
+"print"	{ printf("%s \t PRINT\n", yytext); }
+"if"	{ printf("%s \t IF\n", yytext); }
+"else"	{ printf("%s \t ELSE\n", yytext); }
+"for"	{ printf("%s \t FOR\n", yytext); }
+"while"	{ printf("%s \t WHILE\n", yytext); }
+"true"	{ printf("%s \t TRUE\n", yytext); }
+"false"	{ printf("%s \t FALSE\n", yytext); }
+"break"	{ printf("%s \t BREAK\n", yytext); }
+"string"	{ printf("%s \t STRING\n", yytext); }
+"return"	{ printf("%s \t RET\n", yytext); }
+"continue"	{ printf("%s \t CONT\n", yytext); }
+
+["\n"," "] 	{;}
 
 {id}	{ printf("%s \t ID\n", yytext); }
 
+
+{number}	{ printf("%s \t I_CONST\n", yytext); }
+{number}?\.{number}	{ printf("%s \t F_CONST\n", yytext); }
 
 %%
 
