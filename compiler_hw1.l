@@ -59,7 +59,7 @@ number {digit}+
 "]" 	{ printf("%s \t RSB\n", yytext); }
 ";" 	{ printf("%s \t SEMICOLON\n", yytext); }
 "," 	{ printf("%s \t COMMA\n", yytext); }
-"\"" 	{ 
+"\""	{ 
 			printf("%s \t QUOTA\n", yytext); 
 			BEGIN(string_const);
 		}
@@ -82,9 +82,9 @@ number {digit}+
 "continue"	{ printf("%s \t CONT\n", yytext); }
 
  /* Discard blanks, tabs and newlines */
-[" ", "\t"] 	{;}
+[" ", "\t"]	{;}
 
-"\n" { ++lineNo; }
+"\n"	{ ++lineNo; }
 
 {id}	{ printf("%s \t ID\n", yytext); }
 
@@ -93,43 +93,43 @@ number {digit}+
 {number}\.{number}	{ printf("%s \t F_CONST\n", yytext); }
 
  /* Handle string const */
-<string_const>[^\"] { printf("%s", yytext); }
-<string_const>"\""  { 
+<string_const>[^\"]	{ printf("%s", yytext); }
+<string_const>"\""	{ 
 				     	printf(" \t STR_CONST\n"); 
 					 	printf("\" \t QUOTA\n"); 
 						BEGIN(INITIAL); 
 					}
 
  /* Handle C-style comment */
-<c_comment>"\n" { 
+<c_comment>"\n"	{ 
 					++commentNo; 
 					printf("\n");
 				}
-<c_comment>[^*/\n] { printf("%s", yytext); }
-<c_comment>"*/" { 
+<c_comment>[^*/\n]	{ printf("%s", yytext); }
+<c_comment>"*/"	{ 
 					printf("*/ \t C Comment\n");
 					BEGIN(INITIAL); 
 				}
-<c_comment>"*/\n"   { 
+<c_comment>"*/\n"	{ 
 						++commentNo;
 						printf("*/ \t C Comment\n");
 						BEGIN(INITIAL);
 					}
 
  /* Handle C++-style comment */
-<cpp_comment>[^\n] { printf("%s", yytext); }
-<cpp_comment>"\n" 	{ 
+<cpp_comment>[^\n]	{ printf("%s", yytext); }
+<cpp_comment>"\n"	{ 
 						++commentNo; 
 						printf(" \t C++ Comment\n");
 						BEGIN(INITIAL);
 					}
 
  /* Encounter C-style comment */
-"/*" { BEGIN(c_comment); printf("/*"); }
-"/*\n" { BEGIN(c_comment); printf("/*\n"); ++commentNo;}
+"/*"	{ BEGIN(c_comment); printf("/*"); }
+"/*\n"	{ BEGIN(c_comment); printf("/*\n"); ++commentNo;}
 
  /* Encounter C++-style comment */
- "//" { BEGIN(cpp_comment); printf("//"); }
+ "//"	{ BEGIN(cpp_comment); printf("//"); }
 
 
 %%
