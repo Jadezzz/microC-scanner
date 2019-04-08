@@ -1,1 +1,3 @@
 .vscode/
+myscanner
+lex.yy.c

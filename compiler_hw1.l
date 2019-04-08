@@ -85,6 +85,7 @@ number {digit}+
 [" ", "\t"] 	{;}
 
 "\n" { ++lineNo; }
+
 {id}	{ printf("%s \t ID\n", yytext); }
 
 
@@ -93,24 +94,42 @@ number {digit}+
 
  /* Handle string const */
 <string_const>[^\"] { printf("%s", yytext); }
-<string_const>"\"" { BEGIN(INITIAL); printf(" \t STR_CONST\n"); printf("\" \t QUOTA\n"); }
+<string_const>"\""  { 
+				     	printf(" \t STR_CONST\n"); 
+					 	printf("\" \t QUOTA\n"); 
+						BEGIN(INITIAL); 
+					}
 
  /* Handle C-style comment */
-<c_comment>"\n" { ++commentNo; printf("%s", yytext);}
+<c_comment>"\n" { 
+					++commentNo; 
+					printf("\n");
+				}
 <c_comment>[^*/\n] { printf("%s", yytext); }
-<c_comment>"*/" { BEGIN(INITIAL); printf("%s \t C Comment\n", yytext); }
-<c_comment>"*/\n" { ++commentNo; BEGIN(INITIAL); printf("*/ \t C Comment\n"); }
+<c_comment>"*/" { 
+					printf("*/ \t C Comment\n");
+					BEGIN(INITIAL); 
+				}
+<c_comment>"*/\n"   { 
+						++commentNo;
+						printf("*/ \t C Comment\n");
+						BEGIN(INITIAL);
+					}
 
  /* Handle C++-style comment */
 <cpp_comment>[^\n] { printf("%s", yytext); }
-<cpp_comment>"\n" { ++commentNo; BEGIN(INITIAL); printf(" \t C++ Comment\n");}
+<cpp_comment>"\n" 	{ 
+						++commentNo; 
+						printf(" \t C++ Comment\n");
+						BEGIN(INITIAL);
+					}
 
  /* Encounter C-style comment */
-"/*" { BEGIN(c_comment); printf("%s", yytext); }
-"/*\n" { BEGIN(c_comment); printf("%s", yytext); ++commentNo;}
+"/*" { BEGIN(c_comment); printf("/*"); }
+"/*\n" { BEGIN(c_comment); printf("/*\n"); ++commentNo;}
 
  /* Encounter C++-style comment */
- "//" { BEGIN(cpp_comment); printf("%s", yytext); }
+ "//" { BEGIN(cpp_comment); printf("//"); }
 
 
 %%
