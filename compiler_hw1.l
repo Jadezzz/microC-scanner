@@ -4,10 +4,11 @@
 	#include <stdlib.h>
 	#include <stdbool.h>
 
-	bool isString = false;
 	unsigned int lineNo = 0;
 	unsigned int commentNo = 0;
 %}
+
+%x c_comment cpp_comment string_const
 
 /* Define regular expression label */
 
@@ -59,8 +60,8 @@ number {digit}+
 ";" 	{ printf("%s \t SEMICOLON\n", yytext); }
 "," 	{ printf("%s \t COMMA\n", yytext); }
 "\"" 	{ 
-			isString = !isString;
 			printf("%s \t QUOTA\n", yytext); 
+			BEGIN(string_const);
 		}
 
  /* Keywords */
@@ -80,13 +81,37 @@ number {digit}+
 "return"	{ printf("%s \t RET\n", yytext); }
 "continue"	{ printf("%s \t CONT\n", yytext); }
 
-["\n"," "] 	{;}
+ /* Discard blanks, tabs and newlines */
+[" ", "\t"] 	{;}
 
+"\n" { ++lineNo; }
 {id}	{ printf("%s \t ID\n", yytext); }
 
 
 {number}	{ printf("%s \t I_CONST\n", yytext); }
-{number}?\.{number}	{ printf("%s \t F_CONST\n", yytext); }
+{number}\.{number}	{ printf("%s \t F_CONST\n", yytext); }
+
+ /* Handle string const */
+<string_const>[^\"] { printf("%s", yytext); }
+<string_const>"\"" { BEGIN(INITIAL); printf(" \t STR_CONST\n"); printf("\" \t QUOTA\n"); }
+
+ /* Handle C-style comment */
+<c_comment>"\n" { ++commentNo; printf("%s", yytext);}
+<c_comment>[^*/\n] { printf("%s", yytext); }
+<c_comment>"*/" { BEGIN(INITIAL); printf("%s \t C Comment\n", yytext); }
+<c_comment>"*/\n" { ++commentNo; BEGIN(INITIAL); printf("*/ \t C Comment\n"); }
+
+ /* Handle C++-style comment */
+<cpp_comment>[^\n] { printf("%s", yytext); }
+<cpp_comment>"\n" { ++commentNo; BEGIN(INITIAL); printf(" \t C++ Comment\n");}
+
+ /* Encounter C-style comment */
+"/*" { BEGIN(c_comment); printf("%s", yytext); }
+"/*\n" { BEGIN(c_comment); printf("%s", yytext); ++commentNo;}
+
+ /* Encounter C++-style comment */
+ "//" { BEGIN(cpp_comment); printf("%s", yytext); }
+
 
 %%
 
@@ -100,8 +125,9 @@ int main(int argc,char *argv[])
 {
 	yyin = fopen(argv[1],"r");
 	yylex();
-	printf("\nParse over, the line number is 1.\n\n");
-	printf("comment: 1 lines\n\n");
+	lineNo += commentNo;
+	printf("\nParse over, the line number is %d.\n\n", lineNo);
+	printf("comment: %d lines\n\n", commentNo);
 
 	return 0;
 }
