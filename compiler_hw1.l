@@ -93,9 +93,8 @@ number {digit}+
 {number}\.{number}	{ printf("%s \t F_CONST\n", yytext); }
 
  /* Handle string const */
-<string_const>[^\"]	{ printf("%s", yytext); }
+<string_const>[^\"]*	{ printf("%s \t STR_CONST\n", yytext); }
 <string_const>"\""	{ 
-				     	printf(" \t STR_CONST\n"); 
 					 	printf("\" \t QUOTA\n"); 
 						BEGIN(INITIAL); 
 					}
