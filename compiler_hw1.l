@@ -6,6 +6,8 @@
 
 	unsigned int lineNo = 0;
 	unsigned int commentNo = 0;
+	
+	bool has_string = 0;
 %}
 
 %x c_comment cpp_comment string_const
@@ -59,7 +61,8 @@ number {digit}+
 "]" 	{ printf("%s \t RSB\n", yytext); }
 ";" 	{ printf("%s \t SEMICOLON\n", yytext); }
 "," 	{ printf("%s \t COMMA\n", yytext); }
-"\""	{ 
+"\""	{
+			has_string = 0; 
 			printf("%s \t QUOTA\n", yytext); 
 			BEGIN(string_const);
 		}
@@ -81,7 +84,7 @@ number {digit}+
 "return"	{ printf("%s \t RET\n", yytext); }
 "continue"	{ printf("%s \t CONT\n", yytext); }
 
- /* Discard blanks, tabs and newlines */
+ /* Discard blanks, tabs*/
 [" ", "\t"]	{;}
 
 "\n"	{ ++lineNo; }
@@ -93,8 +96,13 @@ number {digit}+
 {number}\.{number}	{ printf("%s \t F_CONST\n", yytext); }
 
  /* Handle string const */
-<string_const>[^\"]*	{ printf("%s \t STR_CONST\n", yytext); }
-<string_const>"\""	{ 
+
+
+<string_const>[^\\"\n]*   { printf("%s", yytext); has_string = 1; }
+<string_const>\\[\\"]     { printf("%s", yytext); has_string = 1; }
+<string_const>"\""	{
+						if(has_string == 1) 
+							printf(" \t STR_CONST\n");
 					 	printf("\" \t QUOTA\n"); 
 						BEGIN(INITIAL); 
 					}
